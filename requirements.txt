@@ -1,0 +1,21 @@
+# PyTorch核心库
+torch>=2.0.0
+torchvision>=0.15.0
+
+# 图像处理
+opencv-python>=4.8.0
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# 训练工具
+tensorboard>=2.13.0
+tqdm>=4.65.0
+
+# 可视化
+matplotlib>=3.7.0
+
+# 可选：如果需要使用libcom进行对比测试
+# libcom>=0.2.0
+
+# 其他工具
+scikit-image>=0.21.0

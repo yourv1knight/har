@@ -1,0 +1,199 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║          三种训练方案已全部实现！选择你想要的方案开始训练             ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+✅ 测试结果：
+  ✓ 方案1 (U-Net从头训练) - 测试通过
+  ⚠ 方案2 (Libcom PCTNet) - 需要安装libcom
+  ✓ 方案3 (ResNet-UNet) - 测试通过 [推荐]
+
+═══════════════════════════════════════════════════════════════════════
+
+📦 已创建的模型文件：
+
+models/
+├── pctnet.py                    方案1: U-Net从头训练
+├── libcom_pctnet_wrapper.py     方案2: Libcom预训练PCTNet包装器
+├── resnet_unet.py               方案3: ResNet-UNet (ImageNet预训练)
+└── __init__.py                  统一接口
+
+═══════════════════════════════════════════════════════════════════════
+
+🚀 快速开始 - 三个方案选一个：
+
+【方案1】U-Net从头训练（最简单）
+────────────────────────────────
+特点：
+  • 简单高效，不依赖外部权重
+  • 参数量适中 (~5M)
+  • 适合快速实验
+
+启动命令：
+  bash train_plan1_unet.sh
+
+或：
+  python train_universal.py --model_type unet \
+    --train_image_dir your_crack_dataset/train/images \
+    --train_mask_dir your_crack_dataset/train/masks \
+    --val_image_dir your_crack_dataset/val/images \
+    --val_mask_dir your_crack_dataset/val/masks \
+    --epochs 100 --batch_size 8 --lr 2e-4
+
+═══════════════════════════════════════════════════════════════════════
+
+【方案2】Libcom预训练PCTNet（追求性能）
+────────────────────────────────────────
+特点：
+  • 使用官方Transformer PCTNet
+  • 理论性能最佳
+  • 需要安装libcom
+
+前提条件：
+  pip install libcom
+
+启动命令：
+  bash train_plan2_libcom.sh
+
+或：
+  python train_universal.py --model_type libcom \
+    --train_image_dir your_crack_dataset/train/images \
+    --train_mask_dir your_crack_dataset/train/masks \
+    --val_image_dir your_crack_dataset/val/images \
+    --val_mask_dir your_crack_dataset/val/masks \
+    --freeze_encoder \
+    --epochs 50 --batch_size 4 --lr 1e-4
+
+注意：
+  • batch_size建议设为4（显存占用大）
+  • 如果libcom有兼容性问题，使用方案3
+
+═══════════════════════════════════════════════════════════════════════
+
+【方案3】ResNet-UNet (ImageNet预训练) ⭐ 推荐
+────────────────────────────────────────────
+特点：
+  • 使用ImageNet预训练的ResNet18
+  • 平衡性能和易用性
+  • 自动下载权重，无需手动配置
+  • 参数量 ~13M
+
+启动命令：
+  bash train_plan3_resnet.sh
+
+或：
+  python train_universal.py --model_type resnet \
+    --train_image_dir your_crack_dataset/train/images \
+    --train_mask_dir your_crack_dataset/train/masks \
+    --val_image_dir your_crack_dataset/val/images \
+    --val_mask_dir your_crack_dataset/val/masks \
+    --freeze_encoder \
+    --epochs 100 --batch_size 8 --lr 1e-4
+
+优势：
+  • 首次运行自动下载ResNet18权重（~45MB）
+  • 收敛快，性能好
+  • 显存友好
+
+═══════════════════════════════════════════════════════════════════════
+
+💡 选择建议：
+
+不知道选哪个？ → 直接用方案3（ResNet-UNet）
+数据量少（<500张）→ 方案3 + --freeze_encoder
+追求最高精度 → 方案2（需要调试libcom）
+想要最简单 → 方案1
+显存有限 → 方案1（--batch_size 4）
+
+═══════════════════════════════════════════════════════════════════════
+
+📖 详细文档：
+
+• MODEL_COMPARISON.md     - 三个方案详细对比（必读！）
+• README.md              - 完整使用指南
+• PROJECT_OVERVIEW.md    - 技术深度解析
+
+═══════════════════════════════════════════════════════════════════════
+
+🔧 测试模型：
+
+测试所有三个模型是否正常：
+  bash test_all_models.sh
+
+═══════════════════════════════════════════════════════════════════════
+
+📊 监控训练：
+
+启动Tensorboard（在另一个终端）：
+  tensorboard --logdir ./experiments
+
+然后在浏览器打开：
+  http://localhost:6006
+
+═══════════════════════════════════════════════════════════════════════
+
+🎯 关键参数说明：
+
+--model_type       模型类型 (unet/libcom/resnet)
+--freeze_encoder   冻结Encoder（推荐用于小数据集）
+--batch_size       批量大小（根据显存调整：4-16）
+--lr               学习率（微调用1e-4，从头训练用2e-4）
+--epochs           训练轮数（50-100）
+--mask_weight      裂缝区域损失权重（默认5.0）
+--aug_intensity    数据增强强度（low/medium/high）
+
+═══════════════════════════════════════════════════════════════════════
+
+❓ 常见问题：
+
+Q: 我找不到预训练权重？
+A:
+  • 方案1：不需要预训练权重（从头训练）
+  • 方案2：运行run_harmonization.py后，libcom会自动下载
+  • 方案3：torchvision自动下载ResNet权重，无需手动操作 ✓
+
+Q: 显存不足怎么办？
+A:
+  --batch_size 4 --image_size 128
+
+Q: 训练不收敛？
+A:
+  1. 降低学习率：--lr 5e-5
+  2. 检查掩码格式（白色=裂缝区域）
+  3. 降低增强强度：--aug_intensity low
+
+Q: 想切换方案？
+A:
+  只需修改 --model_type 参数：
+  python train_universal.py --model_type resnet ...
+
+═══════════════════════════════════════════════════════════════════════
+
+🎉 推荐的开始步骤：
+
+1️⃣  准备数据集（参考README.md）
+   your_crack_dataset/
+   ├── train/images/ 和 train/masks/
+   └── val/images/ 和 val/masks/
+
+2️⃣  快速测试（20 epochs，验证流程）
+   bash train_plan3_resnet.sh
+   修改脚本中的 --epochs 20
+
+3️⃣  查看训练过程
+   tensorboard --logdir ./experiments
+
+4️⃣  完整训练（80-100 epochs）
+   根据第2步结果调整参数
+
+5️⃣  推理测试
+   python inference_check.py \
+     --checkpoint ./experiments/*/checkpoints/best_model.pth \
+     --image test.jpg --mask test_mask.jpg
+
+═══════════════════════════════════════════════════════════════════════
+
+Good luck with your training! 🚀
+
+查看详细对比：cat MODEL_COMPARISON.md
